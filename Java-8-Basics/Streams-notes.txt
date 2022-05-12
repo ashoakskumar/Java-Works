@@ -1,0 +1,179 @@
+Java - Streams
+1. It is a sequence of objects that supports various method which can be pipelined to get a desired output.Streams can be executed either sequentially or parallely.It supports sequential and aggregate operations.
+	1.1 Sequentially - Uses a single thread to process the operation
+	1.2 Parallel - Using parallel streams, our code gets divide into multiple streams which can be executed parallelly on separate cores of the system and the final result is shown as the combination of all the individual core’s outcomes
+2. Usually stream used to process the collection of objects. Once streams has been executed thru terminal method , the stream instance also be closed and not been reused
+	for example -
+		Stream<String> alpha = Stream.of("A","B","C","D");
+			alpha.forEach(System.out::println);
+			alpha.forEachOrdered(e->System.out.println(e)); //- stream has already been operated upon or closed
+3. The method that returns another stream as result is called intermediate operation
+	3.1 These methods are said to be lazy load, when intermediate methods called , they are just stored in memory and executed when terminal method is called.
+		Intermediate operations- Will return a new stream
+			filter,sort,map,distinct,limit,skip
+4. The method that returns non-stream values such as primitive or object or collection or may not return anything are called terminal operation
+		Terminal operation:-
+			forEach,toArray,reduce,collect, min, max,count,anyMatch,allMatch,noneMatch,findFirst,findAny
+			
+5. Stream.of - IT is used to process the sequence of element collectively
+		Stream<String> alpha = Stream.of("A","B","C","D");
+		alpha.forEach(System.out::println);
+		Stream<String> alpha1 = Stream.of("A","B","C","D");
+		alpha1.forEachOrdered(e->System.out.println(e));
+		
+		Stream<Student> stream = Stream.of(new Student("Ashok", 30),new Student("kumar", 60));
+		stream.forEachOrdered(e->System.out.println(e.getName()));
+6. toArray 
+	/*
+		 * Example-1: In this example we will convert stream of string into array of
+		 * string.
+		 */
+		List<String> stringLst= Arrays.asList("A","B","C");
+		String []strArr = stringLst.stream().toArray(String[]::new);
+		for(String str : strArr) {
+			System.out.println(str);
+		}
+		/*
+		 * Example-2: In this example we will convert stream of string into array of
+		 * string size using lambda expression.
+		 */	
+		strArr = stringLst.stream().toArray(size->new String[size]);
+		for(String str : strArr) {
+			System.out.println(str);
+		}// output - A,B,C
+7. skip - skip the given number of element from the start
+		Stream<Integer> stream = Stream.of(1,2,3,4,5,6,7,8,9).skip(4);
+		stream.forEach(System.out::println); // output - 5,6,7,8,9
+8. peek - Used for debugging to see the element flow that passing the certain point in the pipelined
+		Stream.of(1,2,43,4,5,6,7).filter(i->i>5).peek(System.out::println).forEach(i->System.out.println("i: "+i));
+		output - 43
+				i: 43
+				6
+				i: 6
+				7
+				i: 7
+9. Generate - supplies the element on called
+	Stream.generate(()->new Random().nextInt(10)).limit(5).forEach(System.out::println);
+10. Count - returns the count of element in the stream as long
+	System.out.println(Stream.of(1,2,3,4,5,6).count()); output - 6
+11. Min & Max
+	//min example
+		Optional<Integer> min = Stream.of(30,20,90,70,40,20).min(Comparator.comparing(Integer::intValue));
+		if(min.isPresent())System.out.println(min.get());
+		//output - 20
+		//Max example
+		Optional<Integer> max = Stream.of(30,20,90,70,40,20).max(Comparator.comparing(Integer::intValue));
+		if(max.isPresent())System.out.println(max.get());
+		//output - 90
+		Comparator<String> nameComparator = Comparator.comparing(String::valueOf);
+		Optional<String> minName = Stream.of("Mohit", "Nilesh", "Shankar", "Brajesh").min(nameComparator);
+		if(minName.isPresent()) {
+			System.out.println(minName.get());
+		}//output - Brajesh
+		Optional<String> maxName = Stream.of("Mohit", "Nilesh", "Shankar", "Brajesh").max(nameComparator);
+		if(maxName.isPresent()) {
+			System.out.println(maxName.get());
+		}//output - Shankar
+		//Min Max using reduce method
+		Optional<String> minReduceName = Stream.of("Mohit", "Nilesh", "Shankar", "Brajesh").reduce((s1,s2)->{
+			if(s1.compareTo(s2)<=0) {
+				return s1;
+			} return s2;
+		});
+		if(minReduceName.isPresent()) {
+			System.out.println(minReduceName.get());
+		}//output - Brajesh
+		Optional<String> maxReduceName = Stream.of("Mohit", "Nilesh", "Shankar", "Brajesh").reduce((s1,s2)->{
+			if(s1.compareTo(s2)>=0) {
+				return s1;
+			} return s2;
+		});
+		if(maxReduceName.isPresent()) {
+			System.out.println(maxReduceName.get());
+		}//output - Shankar
+		//min and max using user defined object
+		Optional<Student> maxObject = Stream.of(new Student("Ashok", 30),new Student("kumar", 10)).max(Comparator.comparing(Student::getName));
+		if(maxObject.isPresent()) {
+			System.out.println(maxObject.get().getName());
+		}//output - kumar
+		Optional<Student> minObject = Stream.of(new Student("Ashok", 30),new Student("kumar", 10)).min(Comparator.comparing(Student::getName));
+		if(minObject.isPresent()) {
+			System.out.println(minObject.get().getName());
+		}//output - ashok
+12. Limit 
+	return new stream consisting the element of this stream truncated to given max size in length.
+	public static void main(String[] args) {
+		Stream.of("a","b","c").limit(2).forEach(System.out::println);
+	}//output - a,b
+13. FindFirst - find the first element in the stream as optional
+	public static void main(String[] args) {
+		Stream.of(new Student("Ashok",40),new Student("kumar",90)).filter(std->std.getTotalMarks()>50).findFirst().ifPresent(std->System.out.println(std.getName()));;	
+	}//output - kumar
+14.	FindAny - The findAny method of Stream selects any element in this stream.it is free to select any element in this stream
+15. Stream Concat
+	//stream concat
+		Stream<String> alpha = Stream.concat(Stream.of("a","b"), Stream.of("c","d"));
+		alpha.forEach(System.out::println);
+		//output - a,b,c,d
+		//stream contact - list
+		List<Student> list1 = new ArrayList<>();
+		list1.add(new Student("Ashok",30));
+		List<Student> list2 = new ArrayList<>();
+		list2.add(new Student("Kumar",20));
+		List<Student> concat = Stream.concat(list1.stream(), list2.stream()).collect(Collectors.toList());
+		concat.forEach(list -> System.out.println(list.getName()));//output - Ashok,kumar
+		//Array concat
+		Student s1[] = new Student[1];
+		Student s2[] = new Student[1];
+		s1[0] = new Student("Ashok",30);
+		s2[0] = new Student("Kumar",20);
+		Student[] s = Stream.concat(Stream.of(s1), Stream.of(s2)).toArray(Student[]::new);
+		for(Student std:s) {
+			System.out.println(std.getName());
+		}//output - Ashok,kumar
+16. Distinct - Avoid duplicates.distinct() uses hashCode() and equals() methods to get distinct elements. Hence our class must implement hashCode() and equals() methods
+	//distinct with count
+		Long l = Stream.of("AA","BB","BB","AA").distinct().count();
+		System.out.println(l);//o/p - 2
+		//distinct with string joining
+		String s = Stream.of("AA","BB","BB","AA").distinct().collect(Collectors.joining(","));
+		System.out.println(s);//o/p - AA,BB
+		//distinct for user object
+		List<Book> bookList = new ArrayList<>();
+		bookList.add(new Book("Java Book",300));
+		bookList.add(new Book("Java Book",300));
+		bookList.add(new Book("Angular Book",300));
+		bookList.stream().distinct().forEach(b->System.out.println(b.getName()));
+		//o/p - Java Book,Angular Book
+		
+		//Distinct by property
+		bookList.stream().filter(distinctByKey(b -> b.getName()))
+        .forEach(b -> System.out.println(b.getName()+ "," + b.getPrice())); 
+		//o/p - Java Book,Angular Book
+17. Sort 
+	List<Trainer> trainerList = new ArrayList<>();
+		trainerList.add(new Trainer(1,20,"kumar"));
+		trainerList.add(new Trainer(1,30,"Ashok"));
+		trainerList.add(new Trainer(1,10,"manoj"));
+		//default sort order
+		trainerList.stream().sorted().forEach(t->System.out.println(t.getName()));
+		//reverse sort order
+		trainerList.stream().sorted(Comparator.reverseOrder()).forEach(t->System.out.println(t.getName()));
+		//sort for specific keys
+		trainerList.stream().sorted(Comparator.comparing(Trainer::getAge)).forEach(t->System.out.println(t.getName()));
+18. Map
+	It takes predefined functional interface method for each input values from the streams and produces a result as output stream. its a stateless function.
+		//Map to list
+			Map<Integer,String> map = new HashMap<>();
+			map.put(1, "Ashok");
+			map.put(2,"kumar");
+			map.put(3, "manoj");
+			List<User> usrList = map.entrySet().stream().map(val->new User(val.getKey(),val.getValue())).collect(Collectors.toList());
+			usrList.stream().forEach(usr->System.out.println(usr.getName()));
+			//output - Ashok,Kumar, manoj
+			//add keys to sum value
+			long sum = map.entrySet().stream().mapToInt(mp->mp.getKey()).sum();
+			System.out.println(sum);//o/p 6
+19. Reduce
+	Reduce operation produces a single result from the sequence of stream by repeatedly applying the combining operation to a element in the sequence
+	

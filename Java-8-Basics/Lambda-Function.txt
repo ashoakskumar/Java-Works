@@ -1,0 +1,197 @@
+Java - Lambda function
+1. ()-> it is an anonymous method without name, modifier and return type.
+2. To enable functional programming in java. ()-> is used to provide the implementation of functional interface.A interface which can contain only one abstract method (Single abstract method - SAM ) 
+   and any number of default method and static method
+3. @FunctionalInterface - annotation used to declare and implement single abstract method.
+  	example - 
+  		interface interf{
+		public void m1();
+			public static void m2() {
+				System.out.println("This is is static method");
+			}
+			public default void m3() {
+				System.out.println("This is is default method");
+			}
+		}
+		
+		public class FunctionalInterface {
+			public static void main(String[] args) {
+				interf i = ()-> System.out.println("This is interface"); // if u donot want to use/call this function we can go for default function
+				i.m1();
+				i.m3();
+				interf.m2();
+				
+			}
+		
+		}
+4. Default Method
+	1. Without affecting implementation class , we can add a new method to a interface called default method
+	2. We can override the default method to a implementation class
+	Example - public interface DefaultInterface {
+
+		public default void m1() {
+			System.out.println("This is default interface method 1");
+		};
+		public default String m2() {
+			return "THis is default interface method 2";
+		};
+		
+	}
+	public static void main(String[] args) {
+		DefaultInterfaceMain main = new DefaultInterfaceMain();
+		main.m1();
+		System.out.println(main.m2());
+	}
+	output - This is default interface method 1
+			 THis is default interface method 2
+	3. Default method can solve diamond problem (i.e if two or more interface has same method name declaration)
+		public class DiamondMain implements DiamondInterface,DiamondInterface2{
+
+			public void m1() {
+				DiamondInterface.super.m1();
+			}
+			public static void main(String[] args) {
+				DiamondMain main = new DiamondMain();
+				main.m1();
+			}
+		}
+5. Static method
+	public static void m2() {
+				System.out.println("This is is static method");
+			}
+	interf.m2();
+6. Predefined functional interface.
+	Predicate -> test()
+	function -> apply()
+	consumer -> accept()
+	supplier -> get()
+	The above all will take one input argument
+	6.1 Predicate - TO test the condition, usually it is used to apply in a filter for collection of objects
+		Integer []numbers = {89,99,70,60,10,20,35,65,33,99};
+		Predicate<Integer> divisor = (num)-> num %2 ==0;
+		Predicate<Integer> greater = (num)-> num > 50;
+		for(Integer number : numbers) {
+			if(divisor.test(number)) {
+				System.out.println("Divisor: "+ number);
+			}
+			if(greater.test(number)) {
+				System.out.println("Greater: " + number);
+			}
+		}
+		output - 
+		6.1.1 - Negate() reverse way function
+			if(divisor.negate().test(number)) {
+				System.out.println("Divisor Negate: "+ number);
+			}
+		6.1.2 - And() 
+			if(divisor.and(greater).test(number)) {
+				System.out.println("Divisor And Greater: "+ number);
+			}
+		6.1.3 - Or() 
+			if(divisor.or(greater).test(number)) {
+				System.out.println("Divisor Or Greater: "+ number);
+			}
+	6.2 Function -> input - perform operation - return output
+		Function<Student,String> f2 =  student -> {
+			int totalMarks = student.getTotalMarks();
+			String grade = "";
+			if(totalMarks >= 80) {
+				grade = "Distinction";
+			} else if(totalMarks>= 60 && totalMarks < 80) {
+				grade = "First Class";
+			} else if(totalMarks>= 35 && totalMarks < 60) {
+				grade = "Second Class";
+			} else {
+				grade = "Fail";
+			}
+			return  student.getName() + ":"  +grade;		
+		};
+		
+		Student[] student = {new Student("Ashok",60),new Student("Kumar",20)};
+		for(Student std : student)
+			System.out.println(f2.apply(std));
+			output- Ashok:First Class
+					Kumar:Fail
+		6.2.1 - Function Chaining 
+		
+			6.2.1.1 AndThen()- f2.andThen(f3).apply(std) - f2 followed by f3
+			static Function<String,String> f3 = input -> input.toUpperCase();
+			System.out.println(f2.andThen(f3).apply(std));
+			
+			6.2.1.2 Compose() - System.out.println(f3.compose(f2).apply(std)); - f2 followed by f3
+		
+	6.3 Consumer - Accept the input will never return
+			char []character = {'a','b','b','d'};
+			Consumer<Character> chars = (c)-> System.out.println(c);
+			for(char c:character) {
+				chars.accept(c);
+			}
+			6.3.1 - Consumer Chaining - AndThen
+				chars.andThen(after()).accept(c);
+	6.4 Supplier - supplies the output and wont take the input
+			static Supplier<String> s1 = ()->{
+				String otp = "";
+				for(int i=0;i<6;i++) {
+					otp=otp+(int)(Math.random()*10);
+				}
+				return otp;
+			};
+
+			public static void main(String[] args) {
+				System.out.println(s1.get());
+			}
+		output - 740538 random
+	6.5 Bi-Predicate - Will take two input argument, one for return
+		BiPredicate<Integer,Integer> bi = (i1,i2)->(i1+i2)%2==0;
+		System.out.println(bi.test(10, 10));
+		output- true
+	6.6 Bi-Function Will take 3 i/p args.
+		public class BiFunctionMain {
+			static BiFunction<Integer,Integer,Integer> bi = (i1,i2)->i1+i2;
+			public static void main(String[] args) {
+				System.out.println(bi.apply(10, 10));
+			}
+	6.7 Bi-Consumer Will take 1 i/p args , no return
+		java.util.function.BiConsumer<Integer, Integer> bi = (i1,i2)->System.out.println(i1+i2);
+		bi.accept(10, 10);
+7. Method Reference
+	it is used to refer the method of functional interface
+	Argument parameter  should be same, return type can be different.
+	Three types of Method reference in java
+	1. Static method, 2. Instance method,3. Constructor
+	7.1 Static Method Reference - ContainingClass::MethodName
+			public interface Sayable {
+				public void say();
+			}
+			public static void threadStatus() {
+				System.out.println("Thread is running");
+			}
+				Sayable says = MethodReferenceMain::saySomething;
+				says.say();
+				
+				Thread t = new Thread(MethodReferenceMain::threadStatus);
+				t.start();
+	7.2 Reference to an Instance Method - containingObject::instanceMethodName 
+		public void saySomethingInstance() {
+			System.out.println("Helllo This is Instance method");
+		}
+		Sayable sayInstance = main::saySomethingInstance;
+		sayInstance.say();
+	7.3 Reference to a Constructor - ClassName::new
+		public MethodReferenceMain() {
+			System.out.println("Hello! This is constructor method");
+		}
+		Sayable sayConstructor = MethodReferenceMain::new;
+		sayConstructor.say();	
+8. Primitive Predefined functional interface
+		8.1 IntFunction & DoubleAsInteger, ToIntFunction
+			IntFunction<Integer> inf = (i1)->i1;
+			System.out.println(inf.apply(10));
+			DoubleToIntFunction dtf = (d1)-> (int)d1;
+			System.out.println(dtf.applyAsInt(10.334));
+		8.2 IntPredicate
+		8.3 IntConsumer
+		8.4 BooleanSupplier,IntSupplier,LongSupplier
+		8.5 UnaryOperator - input and output return type always same
+			UnaryOperator<Integer> uo = (i1)-> i1*i1;
+			System.out.println(uo.apply(10)); o/p -100
